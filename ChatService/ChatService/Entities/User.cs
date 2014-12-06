@@ -7,5 +7,7 @@ namespace ChatService.Entities
     {
         public string Name { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string LastCountryCode { get; set; }
+        public string LastCity { get; set; }
     }
 }

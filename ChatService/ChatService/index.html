@@ -179,7 +179,10 @@
                 var msg = messages[i];
                 var row = $('<tr>').appendTo(tablebody);
                 var listItem = $('<td>').appendTo(row);
-                var text = "[" + (new Date(msg.CreatedDate)).toLocaleString() + "] <" + msg.Author + "> " + msg.Text;
+                var location = msg.Country;
+                if (msg.City)
+                    location += ", " + msg.City;
+                var text = "[" + (new Date(msg.CreatedDate)).toLocaleString() + " " + location + "] <" + msg.Author + "> " + msg.Text;
                 listItem.text(text);
             }
         }

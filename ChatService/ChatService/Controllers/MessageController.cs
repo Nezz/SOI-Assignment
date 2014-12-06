@@ -61,6 +61,8 @@ namespace ChatService.Controllers
 
             var entity = await Repo.CreateMessage(name, text, geoLocation);
 
+            await Repo.UpdateUser(user, geoLocation);
+
             return Created(Request.RequestUri + "/messages/" + entity.PartitionKey + "/" + entity.City + "/" + entity.RowKey, entity);
         }
 

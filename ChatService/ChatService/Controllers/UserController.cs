@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
@@ -31,13 +33,31 @@ namespace ChatService.Controllers
             return this.ToUserDto(user);
         }
 
+        [Route("{rowKey}")]
+        [HttpPost]
+        public async Task<IHttpActionResult> UpdateUser(string rowKey, FormDataCollection formData)
+        {
+            var user = await this.GetUserAndThrowIfInvalid();
+            var name = formData.Get("name");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "Missing name" });
+            if (name.Length > 20)
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "Name too long" });
+
+            user.Name = name;
+            await Repo.UpdateUser(user);
+
+            return this.Ok();
+        }
+
         [Route("")]
         [HttpPost]
         public async Task<IHttpActionResult> AddUser()
         {
             var name = await this.GetName();
+            var geoLocation = await this.GetGeoLocation();
 
-            var entity = await Repo.CreateUser(name);
+            var entity = await Repo.CreateUser(name, geoLocation);
 
             return Created(Request.RequestUri + "/users/" + entity.RowKey, entity);
         }
@@ -47,7 +67,9 @@ namespace ChatService.Controllers
             return new UserDTO
             {
                 Name = user.Name,
-                UserId = user.RowKey
+                UserId = user.RowKey,
+                LastCity = user.LastCity,
+                LastCountryCode = user.LastCountryCode
             };
         }
     }
