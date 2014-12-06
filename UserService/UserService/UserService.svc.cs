@@ -24,10 +24,12 @@ namespace UserService
             var client = new HttpClient();
 
             var response = await client.GetAsync("http://www.telize.com/geoip/" + ipAddress);
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-                throw new FaultException(await response.Content.ReadAsStringAsync());
+            var content = await response.Content.ReadAsStringAsync();
 
-            return await JsonConvert.DeserializeObjectAsync<GeoLocation>(await response.Content.ReadAsStringAsync());
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                throw new FaultException(content);
+
+            return await JsonConvert.DeserializeObjectAsync<GeoLocation>(content);
         }
     }
 }

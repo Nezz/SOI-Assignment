@@ -32,10 +32,10 @@ namespace ChatService.ServiceReference1 {
         private string CountryCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int LatitudeField;
+        private float LatitudeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int LongitudeField;
+        private float LongitudeField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -87,7 +87,7 @@ namespace ChatService.ServiceReference1 {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public int Latitude {
+        public float Latitude {
             get {
                 return this.LatitudeField;
             }
@@ -100,7 +100,7 @@ namespace ChatService.ServiceReference1 {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public int Longitude {
+        public float Longitude {
             get {
                 return this.LongitudeField;
             }

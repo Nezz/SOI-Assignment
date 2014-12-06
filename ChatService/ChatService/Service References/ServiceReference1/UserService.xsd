@@ -5,8 +5,8 @@
       <xs:element minOccurs="0" name="City" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Country" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="CountryCode" nillable="true" type="xs:string" />
-      <xs:element minOccurs="0" name="Latitude" type="xs:int" />
-      <xs:element minOccurs="0" name="Longitude" type="xs:int" />
+      <xs:element minOccurs="0" name="Latitude" type="xs:float" />
+      <xs:element minOccurs="0" name="Longitude" type="xs:float" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="GeoLocation" nillable="true" type="tns:GeoLocation" />

@@ -29,9 +29,9 @@ namespace UserService
         public string City { get; set; }
 
         [DataMember]
-        public int Latitude { get; set; }
+        public float Latitude { get; set; }
 
         [DataMember]
-        public int Longitude { get; set; }
+        public float Longitude { get; set; }
     }
 }
