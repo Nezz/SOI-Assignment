@@ -42,16 +42,6 @@
   <ItemGroup>
     <DiagnosticsConfiguration Include="UserServiceContent\diagnostics.wadcfgx" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\UserService\UserService.csproj">
-      <Name>UserService</Name>
-      <Project>{a0a6b0ac-1745-4f16-8b02-133b27815b68}</Project>
-      <Private>True</Private>
-      <RoleType>Web</RoleType>
-      <RoleName>UserService</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
-    </ProjectReference>
-  </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>

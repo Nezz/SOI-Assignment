@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Serialization;
 using System.ServiceModel;
+using Newtonsoft.Json;
 
 namespace UserService
 {
@@ -17,7 +18,7 @@ namespace UserService
     [DataContract]
     public class GeoLocation
     {
-
+        [JsonProperty("country_code")]
         [DataMember]
         public string CountryCode { get; set; }
 
