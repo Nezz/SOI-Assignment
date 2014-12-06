@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GeoChat</title>
+
+    <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootswatch/3.2.0/superhero/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.editable/1.5.1/css/bootstrap-editable.min.css" />
+    <style type="text/css">
+        .table-striped > tbody > tr:nth-child(odd) > td,
+        .table-striped > tbody > tr:nth-child(odd) > th {
+            background-color: #596a7a;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="container-fluid" style="padding-top:15px">
+        <div id="panel" class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">GeoChat</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 panel">
+                        <div id="status" class="panel-body">Loading...</div>
+                    </div>
+                </div>
+
+                <div id="content" class="col-xs-6 col-sm-6 col-md-4 col-lg-4 panel panel-success">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Name</h4>
+                    </div>
+                    <div id="namepanelbody" class="panel-body">
+                        Loading...
+                    </div>
+                </div>
+
+                <div id="content" class="col-xs-6 col-sm-6 col-md-4 col-lg-4 panel panel-success">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Chat area</h4>
+                    </div>
+                    <div id="chatareapanelbody" class="panel-body">
+
+                    </div>
+                </div>
+
+                <div id="content" class="col-xs-6 col-sm-6 col-md-4 col-lg-4 panel panel-success">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Refresh interval</h4>
+                    </div>
+                    <div id="refreshpanelbody" class="panel-body">
+
+                    </div>
+                </div>
+
+                <div id="content" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 panel panel-success">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Messages</h4>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <tbody id="messagestablebody">
+                            </tbody>
+                        </table>
+                        <form class="form-inline" role="form">
+                            <div class="form-group">
+                                <label for="text">New message</label>
+                                <input type="text" class="form-control" id="messagetext" placeholder="Enter message">
+                            </div>
+                            <input type="button" class="btn btn-default" id="messagesubmit" value="Send"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://beta.rumrungame.com/bootstrap-editable.min.js"></script>
+    <script>
+        var messagesUri = "messages/";
+        var subMessagesUri = "";
+        var usersUri = "users/";
+        var baseUrl = 'http://geochatservice.azurewebsites.net/';
+        var id = "";
+        var refreshIntervalId = 0;
+        var refreshInterval = 10000;
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('userId', id);
+            }
+        });
+        $.fn.editable.defaults.placement = 'right';
+
+        $(document).ready(function () {
+            createUser();
+            loadMessages();
+            updateInterval();
+            $("#messagetext").submit(submitMessage);
+            $("#messagesubmit").click(submitMessage);
+        });
+
+        function submitMessage() {
+            $.post(baseUrl + messagesUri, { text: $("#messagetext").val() })
+                .done(function () {
+                    $("#messagetext").val("");
+                    loadMessages();
+                })
+                .fail(function() {
+                alert("Failed to submit message");
+            });
+        }
+
+        function updateInterval() {
+            if (refreshIntervalId)
+                clearInterval(refreshIntervalId);
+
+            refreshIntervalId = setInterval("loadMessages();", refreshInterval);
+        }
+
+        function onLoading() {
+            $('#panel').removeClass('panel-success').removeClass('panel-danger').addClass('panel-info');
+
+            $("#status").text("Loading...");
+        }
+
+        function onLoadingSuccess() {
+            $('#panel').removeClass('panel-info').addClass('panel-success');
+
+            $("#status").text("Connected");
+        }
+
+        function onLoadingFailed() {
+            $('#panel').removeClass('panel-info').addClass('panel-danger');
+
+            $("#status").text("Failed to connect :(");
+        }
+
+        function createUser() {
+            onLoading();
+
+            $.post(baseUrl + usersUri)
+                .done(function (data) {
+                    id = data.RowKey;
+                    $("#namepanelbody").text(data.Name);
+                    onLoadingSuccess();
+                })
+                .fail(function () {
+                    $("#namepanelbody").text("Failed to connect");
+                    onLoadingFailed();
+                });
+        }
+
+        function loadMessages() {
+            onLoading();
+
+            $.getJSON(baseUrl + messagesUri + subMessagesUri)
+                .done(function (data) {
+                    onLoadingSuccess();
+                    writeMessages(data);
+                })
+             .fail(function () {
+                 onLoadingFailed();
+             });
+        }
+
+        function writeMessages(messages) {
+            var tablebody = $("#messagestablebody");
+            tablebody.empty();
+
+            if (messages.length === 0)
+                $('<tr>', { text: "Nothing here yet" }).appendTo(tablebody);
+
+            for (var i = 0; i < messages.length; i++) {
+                var msg = messages[i];
+                var row = $('<tr>').appendTo(tablebody);
+                var listItem = $('<td>').appendTo(row);
+                var text = "[" + (new Date(msg.CreatedDate)).toLocaleString() + "] <" + msg.Author + "> " + msg.Text;
+                listItem.text(text);
+            }
+        }
+
+    </script>
+</body>
+</html>

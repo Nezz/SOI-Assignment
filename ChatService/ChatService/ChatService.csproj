@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="index.html" />
     <Content Include="Service References\ServiceReference1\ChatService.ServiceReference1.GeoLocation.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Content>
