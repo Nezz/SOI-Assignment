@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -10,31 +11,32 @@ using ChatService.Entities;
 
 namespace ChatService.Controllers
 {
+    [RoutePrefix("messages")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class MessageController : ControllerBase
     {
-        [Route("messages")]
+        [Route("")]
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetAllMessages()
         {
             return (await Repo.GetAllMessages()).Select(this.ToMessageDto);
         }
 
-        [Route("messages/{countryCode}")]
+        [Route("{countryCode}")]
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetCountryMessages(string countryCode)
         {
             return (await Repo.GetCountryMessages(countryCode)).Select(this.ToMessageDto);
         }
 
-        [Route("messages/{countryCode}/{city}")]
+        [Route("{countryCode}/{city}")]
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetCityMessages(string countryCode, string city)
         {
             return (await Repo.GetCityMessages(countryCode, city)).Select(this.ToMessageDto);
         }
 
-        [Route("messages/{countryCode}/{city}/{rowKey}")]
+        [Route("{countryCode}/{city}/{rowKey}")]
         [HttpGet]
         public async Task<MessageDTO> GetMessage(string countryCode, string city, string rowKey)
         {
@@ -45,15 +47,16 @@ namespace ChatService.Controllers
             return this.ToMessageDto(message);
         }
 
-        [Route("messages")]
+        [Route("")]
         [HttpPost]
         public async Task<IHttpActionResult> AddMessage(FormDataCollection formData)
         {
             var text = formData.Get("text");
             if (string.IsNullOrWhiteSpace(text))
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "Missing message" });
 
-            var name = await this.GetName();
+            var user = await this.GetUserAndThrowIfInvalid();
+            var name = user.Name;
             var geoLocation = await this.GetGeoLocation();
 
             var entity = await Repo.CreateMessage(name, text, geoLocation);
