@@ -32,8 +32,8 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">Name</h4>
                     </div>
-                    <div id="namepanelbody" class="panel-body">
-                        Loading...
+                    <div class="panel-body">
+                        <a href="#" id="nameeditable">Loading...</a>
                     </div>
                 </div>
 
@@ -41,8 +41,16 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">Chat area</h4>
                     </div>
-                    <div id="chatareapanelbody" class="panel-body">
-
+                    <div class="panel-body">
+                        <div class="dropdown">
+                            <form role="form">
+                                <select class="form-control" id="areaselect">
+                                    <option value="global">Global</option>
+                                    <option value="country">Country</option>
+                                    <option value="city" id="cityoption">City</option>
+                                </select>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -50,8 +58,16 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">Refresh interval</h4>
                     </div>
-                    <div id="refreshpanelbody" class="panel-body">
-
+                    <div class="panel-body">
+                        <form role="form">
+                            <select class="form-control" id="refreshselect">
+                                <option value="0">Disabled</option>
+                                <option value="5">5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">60 seconds</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
 
@@ -66,8 +82,7 @@
                         </table>
                         <form class="form-inline" role="form">
                             <div class="form-group">
-                                <label for="text">New message</label>
-                                <input type="text" class="form-control" id="messagetext" placeholder="Enter message">
+                                <input type="text" class="form-control" id="messagetext" placeholder="Enter message" style="width:500px;">
                             </div>
                             <input type="button" class="btn btn-default" id="messagesubmit" value="Send"/>
                         </form>
@@ -87,14 +102,16 @@
         var baseUrl = 'http://geochatservice.azurewebsites.net/';
         var id = "";
         var refreshIntervalId = 0;
-        var refreshInterval = 10000;
+        var refreshInterval = 0;
+        var country = "";
+        var city = "";
 
         $.ajaxSetup({
             beforeSend: function (xhr) {
                 xhr.setRequestHeader('userId', id);
             }
         });
-        $.fn.editable.defaults.placement = 'right';
+        $.fn.editable.defaults.mode = 'inline';
 
         $(document).ready(function () {
             createUser();
@@ -102,6 +119,25 @@
             updateInterval();
             $("#messagetext").submit(submitMessage);
             $("#messagesubmit").click(submitMessage);
+
+            $("#refreshselect").change(function () {
+                var optionSelected = $(this).find("option:selected");
+                refreshInterval = parseInt(optionSelected.val());
+                updateInterval();
+            });
+
+            $("#areaselect").change(function () {
+                var optionSelected = $(this).find("option:selected");
+                var val = optionSelected.val();
+                if (val === "global")
+                    subMessagesUri = "";
+                else if (val === "country")
+                    subMessagesUri = country;
+                else if (val === "city")
+                    subMessagesUri = country + "/" + city;
+
+                loadMessages();
+            });
         });
 
         function submitMessage() {
@@ -119,7 +155,8 @@
             if (refreshIntervalId)
                 clearInterval(refreshIntervalId);
 
-            refreshIntervalId = setInterval("loadMessages();", refreshInterval);
+            if (refreshInterval)
+                refreshIntervalId = setInterval("loadMessages();", refreshInterval * 1000);
         }
 
         function onLoading() {
@@ -146,13 +183,29 @@
             $.post(baseUrl + usersUri)
                 .done(function (data) {
                     id = data.RowKey;
-                    $("#namepanelbody").text(data.Name);
+                    updateNameText(data.Name);
+                    country = data.LastCountryCode;
+                    city = data.LastCity;
+                    if (!city)
+                        $("#cityoption").attr("disabled", "disabled");
+
                     onLoadingSuccess();
                 })
                 .fail(function () {
-                    $("#namepanelbody").text("Failed to connect");
+                    updateNameText("Failed to connect");
                     onLoadingFailed();
                 });
+        }
+
+        function updateNameText(text) {
+            var nameEditable = $("#nameeditable");
+            nameEditable.text(text);
+            nameEditable.editable({
+                type: 'text',
+                name: 'name',
+                url: baseUrl + usersUri + id,
+                title: 'Change name'
+            });
         }
 
         function loadMessages() {
