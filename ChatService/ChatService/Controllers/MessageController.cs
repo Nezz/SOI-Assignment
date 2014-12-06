@@ -19,21 +19,21 @@ namespace ChatService.Controllers
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetAllMessages()
         {
-            return (await Repo.GetAllMessages()).Select(this.ToMessageDto);
+            return (await Repo.GetAllMessages()).Select(this.ToMessageDto).OrderBy(message => message.CreatedDate);
         }
 
         [Route("{countryCode}")]
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetCountryMessages(string countryCode)
         {
-            return (await Repo.GetCountryMessages(countryCode)).Select(this.ToMessageDto);
+            return (await Repo.GetCountryMessages(countryCode)).Select(this.ToMessageDto).OrderBy(message => message.CreatedDate);
         }
 
         [Route("{countryCode}/{city}")]
         [HttpGet]
         public async Task<IEnumerable<MessageDTO>> GetCityMessages(string countryCode, string city)
         {
-            return (await Repo.GetCityMessages(countryCode, city)).Select(this.ToMessageDto);
+            return (await Repo.GetCityMessages(countryCode, city)).Select(this.ToMessageDto).OrderBy(message => message.CreatedDate);
         }
 
         [Route("{countryCode}/{city}/{rowKey}")]
